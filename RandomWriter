@@ -1,0 +1,156 @@
+// mklein17@georgefox.com
+// Program 11
+// 2018-12-02
+
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Random;
+/**
+ *
+ * @author Matthew Klein
+ */
+public class RandomWriter {
+    private static HashMap<String, ArrayList<String>> _populateMap = new HashMap<>();
+    private static int _prefixLength;
+    private static int _textLength;
+    private static String _files;
+    // default consructor
+    public RandomWriter() {
+        
+    }
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) throws IOException {
+        // validate the input
+        validateInput(args);
+        // give the values of the keya and how long the text should be
+        try {
+            if (args.length > 1) {
+                _prefixLength = Integer.parseInt(args[0]);
+                _textLength = Integer.parseInt(args[1]);
+            }
+            
+        }
+        catch (IllegalArgumentException e) {
+            System.err.println("Invalid input.");
+            System.exit(2);
+        }
+        //if (args.length > 2) {
+             // loop through all the files and populate the hashmap
+            for (int i = 2; i < args.length; i++) {
+                _files = args[i];
+                populateHashmap(_files);
+            }
+        //}
+
+            System.out.print(generateFunnyText());
+    }
+
+    // store contents of files in hashmap
+    private static void populateHashmap(String newFile) throws IOException {
+        try {
+
+            String addLetter;
+            String line = "";
+            String readText;
+            String key;
+            BufferedReader in = new BufferedReader(new FileReader(newFile));
+
+            //line = in.readLine();
+            while ((readText = in.readLine()) != null) {
+                line += readText;
+            }
+                for (int i = 0; i < _textLength - _prefixLength; i++) {
+                    
+                key = line.substring(i, _prefixLength + i);
+                
+                addLetter = line.substring(_prefixLength + i, _prefixLength + i + 1);
+                
+                if (!_populateMap.containsKey(key)) {
+                    //System.out.print(i);
+                    _populateMap.put(key, new ArrayList<String>());
+                }
+
+                
+                _populateMap.get(key).add(addLetter);
+                //System.out.println(_populateMap.size());
+            }
+        }
+        catch (FileNotFoundException e) {
+            System.err.println("File not found.");
+        }
+    }
+    // generate output text
+    private static String generateFunnyText() {
+        // create array to store the keys of the map
+        int i;
+        int startingLetter;
+        Random randomGenerator;
+        boolean moreContent;
+        String storeKey;
+        String funnyText;
+        String endLetter;
+
+        // generate random number to pick the first word
+        randomGenerator = new Random();
+        startingLetter = randomGenerator.nextInt(_populateMap.size());
+        storeKey = (String)_populateMap.keySet().toArray()[startingLetter];
+        funnyText = storeKey;
+        i = 0;
+        moreContent = true;
+        while (i < _textLength && moreContent) {
+            if (_populateMap.containsKey(storeKey)) {
+                // generate a new random number
+                startingLetter = randomGenerator.nextInt(_populateMap.get(storeKey).size());
+                
+                // access the arraylist and take out the letter at the random
+                // number just generated
+                endLetter = _populateMap.get(storeKey).get(startingLetter);
+                // remove the first letter
+                storeKey = storeKey.substring(1);
+                // increment end key
+                storeKey += endLetter;
+                // increment final product
+                funnyText += endLetter;
+            }
+            else {
+                moreContent = false;
+            }
+            i++;
+        }
+        return funnyText;
+    }
+
+        // validate arges
+    private static void validateInput(String[] args) {
+        // insted of this you can so Integer.parseInt(args[0] which will throw 
+        // an exception
+        try {
+            if (args.length > 2 && (Integer.parseInt(args[0]) < 0
+                    || Integer.parseInt(args[1]) < 0)) {
+                System.err.println("Invalid input bud.");
+                System.exit(1);
+            }
+        }
+        catch (NumberFormatException e) {
+            System.err.println("Invalid Input");
+        }
+        // validate the input
+        // the length of args should be greater than 3
+        // args[0] and args[1] should be digits
+        // args[0] and args[1] should be greater than 0
+        // if not, exit with status code of 1 and print an err message
+        /*if (args.length < 3 || ((!args[0].matches("\\p{Digit}")
+                && Integer.parseInt(args[0]) < 0))
+            || (!args[1].matches("\\p{Digit}")
+                && Integer.parseInt(args[1]) < 0)) {
+            System.err.println("Invalid input bud.");
+            System.exit(1);
+        }*/
+    }
+}
